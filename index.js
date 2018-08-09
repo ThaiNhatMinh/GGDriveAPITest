@@ -8,7 +8,7 @@ const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
 const TOKEN_PATH = 'client_id.json';
 
 // Load client secrets from a local file.
-fs.readFile('credentials.json', (err, content) => {
+fs.readFile('client_secret.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
   // Authorize a client with credentials, then call the Google Drive API.
   authorize(JSON.parse(content), listFiles);
@@ -24,7 +24,7 @@ fs.readFile('credentials.json', (err, content) => {
 
 
 function authorize(credentials, callback) {
-  const {client_secret, client_id, redirect_uris} = credentials.installed;
+  const {client_secret, client_id, redirect_uris} = credentials.web;
   const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
   //const oAuth2Client = new OAuth2Client(client_id, client_secret, redirect_uris[0]);
   // Check if we have previously stored a token.
@@ -61,7 +61,7 @@ function getAccessToken(oAuth2Client, callback) {
     oAuth2Client.getToken(code, (err, token) => {
       if (err)
       {
-        fs.writeFile("error.log", JSON.stringify(err), (err) => {
+          fs.writeFile("error.log", JSON.stringify(err), (err) => {
             if (err) console.error(err);
           });
           console.log("Error geting token ");
@@ -84,10 +84,7 @@ function getAccessToken(oAuth2Client, callback) {
  */
 function listFiles(auth) {
   const drive = google.drive({version: 'v3', auth});
-  drive.files.list({
-    pageSize: 10,
-    fields: 'nextPageToken, files(id, name)',
-  }, (err, res) => {
+  drive.files.list({pageSize: 100}, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     const files = res.data.files;
     if (files.length) {
